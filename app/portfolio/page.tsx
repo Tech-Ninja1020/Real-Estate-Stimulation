@@ -5,6 +5,7 @@ import { ScenarioGate } from "@/components/ScenarioGate";
 import { EquityDebtChart } from "@/components/portfolio/EquityDebtChart";
 import { PortfolioKpis } from "@/components/portfolio/PortfolioKpis";
 import { PropertyCard } from "@/components/portfolio/PropertyCard";
+import { Skyline } from "@/components/portfolio/Skyline";
 import { YearScrubber } from "@/components/portfolio/YearScrubber";
 import {
   recaptureCeilingRate,
@@ -59,6 +60,8 @@ export default function PortfolioPage() {
               recaptureTax={recaptureTaxAtCeiling(household, recapture)}
               ceilingRate={ceiling}
             />
+
+            <Skyline properties={originals} year={year} salePlanIds={config.sellPropertyIds} />
 
             <section aria-labelledby="holdings-heading">
               <div className="mb-4 flex items-end justify-between gap-3">

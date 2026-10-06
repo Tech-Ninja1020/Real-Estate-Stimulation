@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Geist, Geist_Mono } from "next/font/google";
 import { AppShell } from "@/components/AppShell";
+import { PointerGlow } from "@/components/PointerGlow";
 import { MathProvider } from "@/components/math/MathProvider";
 import { ScenarioProvider } from "@/lib/scenario-store";
 import "./globals.css";
@@ -42,6 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script suppressHydrationWarning dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body>
+        <PointerGlow />
         <ScenarioProvider>
           <MathProvider>
             <AppShell>{children}</AppShell>

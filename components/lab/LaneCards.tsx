@@ -96,7 +96,7 @@ function LaneCard({
       }}
       className={cn(
         "card relative flex flex-col overflow-hidden",
-        leader && "ring-1 ring-[color-mix(in_srgb,var(--accent)_55%,transparent)]",
+        leader && "lead-glow shadow-card",
       )}
       aria-label={`${STRATEGY_LABEL[lane]} lane`}
     >

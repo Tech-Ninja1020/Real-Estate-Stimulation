@@ -171,6 +171,26 @@ export function NetWorthChart({
     return out;
   }, [years, values, x, y]);
 
+  // Divergence ribbon: the gap between the strategy that finishes first and the one that finishes second.
+  const ribbon = useMemo(() => {
+    const last = years.length - 1;
+    const ranked = STRATEGY_ORDER.map((k) => ({ k, v: values[k][last] ?? 0 })).sort(
+      (a, b) => b.v - a.v,
+    );
+    const lead = ranked[0];
+    const runnerUp = ranked[1];
+    if (!lead || !runnerUp || lead.v === runnerUp.v) return null;
+    return {
+      lead: lead.k,
+      runnerUp: runnerUp.k,
+      points: years.map((yr, i) => [
+        x(yr),
+        y(values[lead.k][i] ?? 0),
+        y(values[runnerUp.k][i] ?? 0),
+      ]),
+    };
+  }, [years, values, x, y]);
+
   const bandPoints = useMemo(() => {
     if (!bands) return null;
     const out = {} as Record<StrategyKind, { area: PathPoints; median: PathPoints }>;
@@ -289,6 +309,16 @@ export function NetWorthChart({
       color: STRATEGY_COLOR[k],
       dash: STRATEGY_DASH[k],
     })),
+    ...(ribbon && !bands
+      ? [
+          {
+            key: "ribbon",
+            label: `${STRATEGY_LABEL[ribbon.lead]}'s lead over ${STRATEGY_LABEL[ribbon.runnerUp]}`,
+            color: `color-mix(in srgb, ${STRATEGY_COLOR[ribbon.lead]} 28%, transparent)`,
+            shape: "area" as const,
+          },
+        ]
+      : []),
     ...(bands
       ? [
           {
@@ -463,6 +493,16 @@ export function NetWorthChart({
               </defs>
 
               <g clipPath={`url(#${clipId})`}>
+                {/* Divergence ribbon: how far the leader pulls ahead of the runner-up */}
+                {ribbon && !bandPoints && (
+                  <TweenPath
+                    data={ribbon.points}
+                    build={buildArea}
+                    fill={STRATEGY_COLOR[ribbon.lead]}
+                    fillOpacity={0.11}
+                    stroke="none"
+                  />
+                )}
                 {/* Monte Carlo bands */}
                 {bandPoints && (
                   <motion.g

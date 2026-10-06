@@ -1,16 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ScenarioGate } from "@/components/ScenarioGate";
 import { ControlsPanel } from "@/components/lab/ControlsPanel";
 import { LaneCards } from "@/components/lab/LaneCards";
+import { SaleDollarBar } from "@/components/lab/SaleDollarBar";
 import { NetWorthChart } from "@/components/lab/NetWorthChart";
 import { TaxComparisonChart } from "@/components/lab/TaxComparisonChart";
 import { TimelineStrip } from "@/components/lab/TimelineStrip";
 import { WaterfallChart } from "@/components/lab/WaterfallChart";
 import { Toggle } from "@/components/ui/primitives";
 import { fmtMoney } from "@/lib/format";
-import { STRATEGY_LABEL, STRATEGY_ORDER } from "@/lib/strategy";
+import { STRATEGY_COLOR, STRATEGY_LABEL, STRATEGY_ORDER } from "@/lib/strategy";
 import { useLoadedScenario } from "@/lib/scenario-store";
 
 type Loaded = NonNullable<ReturnType<typeof useLoadedScenario>>;
@@ -58,6 +59,30 @@ function Lab({ scenario }: { scenario: Loaded }) {
     setStepUp,
   } = scenario;
 
+  // Tint the page's ambient glow with the colour of whichever strategy leads at the scrubber year.
+  const leader = (() => {
+    const rows = STRATEGY_ORDER.map((k) => {
+      const row =
+        results[k].years.find((y) => y.year === year) ??
+        results[k].years[results[k].years.length - 1];
+      return {
+        k,
+        v: row ? (stepUp ? row.netWorthLiquidatedWithStepUp : row.netWorthLiquidated) : 0,
+      };
+    }).sort((a, b) => b.v - a.v);
+    const top = rows[0];
+    const bottom = rows[rows.length - 1];
+    return top && bottom && top.v !== bottom.v ? top.k : null;
+  })();
+  useEffect(() => {
+    const root = document.documentElement;
+    const color = leader ? STRATEGY_COLOR[leader] : "var(--accent)";
+    root.style.setProperty("--bg-glow-1", `color-mix(in srgb, ${color} 16%, transparent)`);
+    return () => {
+      root.style.removeProperty("--bg-glow-1");
+    };
+  }, [leader]);
+
   return (
     <div>
       <div className="mb-8 flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
@@ -97,6 +122,8 @@ function Lab({ scenario }: { scenario: Loaded }) {
             horizonYear={horizonYear}
             sellYear={config.sellYear}
           />
+
+          <SaleDollarBar sale={results.sell.sale} />
 
           <div className="grid gap-6 2xl:grid-cols-2">
             <WaterfallChart sale={results.sell.sale} strategy="sell" />

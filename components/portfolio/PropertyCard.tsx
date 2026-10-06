@@ -12,6 +12,7 @@ import type {
   TimelineEvent,
   Year,
 } from "@/engine/types";
+import { DepreciationRing } from "./DepreciationRing";
 import { EquitySparkline } from "./EquitySparkline";
 import { loanToValue, loanTypeCounts, propertyBadges } from "./facts";
 
@@ -89,13 +90,16 @@ export function PropertyCard({
             </h3>
             <p className="text-ink-3 mt-1 text-xs">{property?.location ?? ""}</p>
           </div>
-          <div className="flex shrink-0 flex-col items-end gap-1.5">
-            <Chip>
-              {row.status === "owned" && property
-                ? `Owned since ${property.purchaseYear}`
-                : STATUS_LABEL[row.status]}
-            </Chip>
-            {inSalePlan && <Chip tone="accent">In the sale plan</Chip>}
+          <div className="flex shrink-0 items-start gap-3">
+            <div className="flex flex-col items-end gap-1.5">
+              <Chip>
+                {row.status === "owned" && property
+                  ? `Owned since ${property.purchaseYear}`
+                  : STATUS_LABEL[row.status]}
+              </Chip>
+              {inSalePlan && <Chip tone="accent">In the sale plan</Chip>}
+            </div>
+            <DepreciationRing timeline={timeline} year={year} />
           </div>
         </header>
 
